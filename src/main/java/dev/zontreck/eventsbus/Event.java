@@ -1,5 +1,6 @@
 package dev.zontreck.eventsbus;
 
+@Priority(Level = PriorityLevel.LOWEST)
 public class Event {
     private boolean cancelled = false;
 
@@ -17,8 +18,8 @@ public class Event {
     /**
      * Checks if the event is cancelled.
      * 
-     * @return False if the event cannot be cancelled, or returns the current status
-     *         for the event.
+     * @return False if the event cannot be cancelled; or 
+     * The current cancellation status for the event
      */
     public boolean isCancelled() {
         if (!IsCancellable())
@@ -33,5 +34,10 @@ public class Event {
      */
     public void setCancelled(boolean cancel) {
         cancelled = cancel;
+    }
+
+    public PriorityLevel getPriorityLevel() {
+        Class<?> Current = this.getClass();
+        return Current.getAnnotation(Priority.class).Level();
     }
 }
