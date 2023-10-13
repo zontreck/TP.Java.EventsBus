@@ -1,5 +1,7 @@
 package dev.zontreck.eventsbus;
 
+import dev.zontreck.eventsbus.events.EventBusReadyEvent;
+import dev.zontreck.eventsbus.events.ResetEventBusEvent;
 import org.checkerframework.common.reflection.qual.GetClass;
 
 import java.lang.reflect.InvocationTargetException;
@@ -20,6 +22,14 @@ public class Bus {
     public Bus(String name, boolean useInstances) {
         BusName = name;
         UsesInstances = useInstances;
+
+        try {
+            Post(new EventBusReadyEvent());
+        } catch (InvocationTargetException e) {
+            throw new RuntimeException(e);
+        } catch (IllegalAccessException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     public Map<Class<?>, List<EventContainer>> static_events = new HashMap<Class<?>, List<EventContainer>>();
@@ -114,5 +124,30 @@ public class Bus {
         }
 
         return event.isCancelled();
+    }
+
+    /**
+     * Attempts to reset the Event Bus
+     *
+     * @return True if the bus was successfully reset (If not interrupts!)
+     * @see dev.zontreck.eventsbus.events.ResetEventBusEvent
+     */
+    public static boolean Reset() {
+        try {
+            if (!Post(new ResetEventBusEvent())) {
+
+                Main.static_events = new HashMap<>();
+                Main.instanced_events = new HashMap<>();
+
+                Post(new EventBusReadyEvent());
+            }
+        } catch (InvocationTargetException e) {
+            throw new RuntimeException(e);
+        } catch (IllegalAccessException e) {
+            throw new RuntimeException(e);
+        }
+
+        return false;
+
     }
 }
