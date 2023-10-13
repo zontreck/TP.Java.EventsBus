@@ -70,8 +70,6 @@ publishing {
             url = "https://maven.zontreck.dev/repository/zontreck"
             name = "ariascreations"
             group = "dev.zontreck"
-
-            version = apiVer
             if (project.findProperty(MAVEN_PASSWORD_PROPERTY) != null) {
                 credentials {
                     username = "admin"
