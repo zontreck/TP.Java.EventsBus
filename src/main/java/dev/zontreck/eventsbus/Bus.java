@@ -2,20 +2,17 @@ package dev.zontreck.eventsbus;
 
 import org.checkerframework.common.reflection.qual.GetClass;
 
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
+import java.util.*;
+import java.util.stream.Collectors;
 
 public class Bus {
     /**
-     * This bus disallows registering of instances, and will only invoke static events.
+     * The main event bus!
      */
-    private static Bus Static = new Bus("Main Event Bus", false);
-    /**
-     * This bus requires registering of instances. Events fired here do not call static events.
-     */
-    private static Bus Directed = new Bus("Direct Event Bus", true);
+    private static Bus Main = new Bus("Main Event Bus", false);
+
     public final String BusName;
     public final boolean UsesInstances;
 
@@ -35,23 +32,60 @@ public class Bus {
         return false;
     }
 
-    public Map<Class<?>, EventContainer> static_events = new HashMap<Class<?>, EventContainer>();
-    public Map<Class<?>, EventContainer> instanced_events = new HashMap<Class<?>, EventContainer>();
+    public Map<Class<?>, List<EventContainer>> static_events = new HashMap<Class<?>, List<EventContainer>>();
+    public Map<Class<?>, List<EventContainer>> instanced_events = new HashMap<Class<?>, List<EventContainer>>();
 
-    public static <T> void Register(Class<T> clazz, T instance)
-    {
-        EventContainer container = new EventContainer();
-        if(instance == null)
-        {
-            // Will not register the instanced handlers
+    public static <T> void Register(Class<T> clazz, T instance) {
+
+        List<Method> nonStaticMethods = Arrays.stream(clazz.getMethods())
+                .filter(x -> x.isAnnotationPresent(Subscribe.class))
+                .filter(x -> x.getModifiers() != Modifier.STATIC)
+                .toList();
+
+        List<Method> staticMethods = Arrays.stream(clazz.getMethods())
+                .filter(x -> x.isAnnotationPresent(Subscribe.class))
+                .filter(x -> x.getModifiers() == Modifier.STATIC)
+                .toList();
+
+        // Register the non-static methods if applicable
+        if (instance != null) {
+            for (Method m :
+                    nonStaticMethods) {
+                EventContainer container = new EventContainer();
+                container.instance = instance;
+                container.method = m;
+                container.clazz = clazz;
+                if (m.isAnnotationPresent(Priority.class))
+                    container.Level = m.getAnnotation(Priority.class).Level();
+                else container.Level = PriorityLevel.LOWEST;
+
+                container.IsSingleshot = m.isAnnotationPresent(SingleshotEvent.class);
+
+                if (Main.instanced_events.containsKey(clazz))
+                    Main.instanced_events.get(clazz).add(container);
+                else {
+                    Main.instanced_events.put(clazz, new ArrayList<>());
+                    Main.instanced_events.get(clazz).add(container);
+                }
+            }
         }
-        else {
-            // Will register instanced handlers.
+
+        for (Method m : staticMethods) {
+            EventContainer container = new EventContainer();
+            container.instance = null;
+            container.clazz = clazz;
+            if (m.isAnnotationPresent((Priority.class)))
+                container.Level = m.getAnnotation(Priority.class).Level();
+            else container.Level = PriorityLevel.LOWEST;
+
+            container.IsSingleshot = m.isAnnotationPresent(SingleshotEvent.class);
+
+            if (Main.static_events.containsKey(clazz))
+                Main.static_events.get(clazz).add(container);
+            else {
+                Main.static_events.put(clazz, new ArrayList<>());
+                Main.static_events.get(clazz).add(container);
+            }
         }
-
-        // Register static handlers.
-        Arrays.stream(clazz.getMethods())
-                .filter(x->x.isAnnotationPresent(Subscribe.class))
-
     }
 }

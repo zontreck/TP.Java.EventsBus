@@ -13,13 +13,6 @@ public class EventContainer {
     public Method method;
 
     /**
-     * The event that gets called!
-     *
-     * @see Event
-     */
-    public Event event;
-
-    /**
      * Indicates whether an event gets removed from the register after being invoked once.
      */
     public boolean IsSingleshot;
@@ -40,7 +33,7 @@ public class EventContainer {
      */
     public boolean invoke(Event EventArg, PriorityLevel level) throws InvocationTargetException, IllegalAccessException {
         if (Level != level) return false;
-        
+
         if (instance == null) {
             method.invoke(null, EventArg);
         } else {
