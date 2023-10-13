@@ -16,6 +16,7 @@ public class Bus {
      */
     private static Bus Main = new Bus("Main Event Bus", false);
 
+    public static boolean debug = false;
     public final String BusName;
     public final boolean UsesInstances;
 
