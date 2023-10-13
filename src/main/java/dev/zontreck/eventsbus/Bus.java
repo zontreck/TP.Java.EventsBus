@@ -2,6 +2,7 @@ package dev.zontreck.eventsbus;
 
 import org.checkerframework.common.reflection.qual.GetClass;
 
+import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.util.*;
@@ -19,17 +20,6 @@ public class Bus {
     public Bus(String name, boolean useInstances) {
         BusName = name;
         UsesInstances = useInstances;
-    }
-
-    /**
-     * Posts an event to the event message bus.
-     *
-     * @param event The event to be posted to all classes
-     * @return True if the event was cancelled.
-     */
-    public boolean Post(Event event) {
-
-        return false;
     }
 
     public Map<Class<?>, List<EventContainer>> static_events = new HashMap<Class<?>, List<EventContainer>>();
@@ -87,5 +77,42 @@ public class Bus {
                 Main.static_events.get(clazz).add(container);
             }
         }
+    }
+
+    /**
+     * Posts an event to the bus.
+     *
+     * @param event The event you wish to post
+     * @return True if the event was cancelled.
+     */
+    public static boolean Post(Event event) throws InvocationTargetException, IllegalAccessException {
+        for (PriorityLevel level :
+                PriorityLevel.values()) {
+            // Call each priority level in order of declaration
+            // Static first, then instanced
+            // At the end, this method will return the cancellation result.
+
+            if (Main.static_events.containsKey(event.getClass())) {
+                EventContainer[] tempArray = (EventContainer[]) Main.static_events.get(event.getClass()).toArray();
+
+                for (EventContainer container : tempArray) {
+                    if (container.invoke(event, level)) {
+                        Main.static_events.get(event.getClass()).remove(container);
+                    }
+                }
+            }
+
+            if (Main.instanced_events.containsKey(event.getClass())) {
+                EventContainer[] tempArray = (EventContainer[]) Main.instanced_events.get(event.getClass()).toArray();
+
+                for (EventContainer container : tempArray) {
+                    if (container.invoke(event, level)) {
+                        Main.instanced_events.get(event.getClass()).remove(container);
+                    }
+                }
+            }
+        }
+
+        return event.isCancelled();
     }
 }
