@@ -49,11 +49,6 @@ repositories {
 
 dependencies {
 
-    // This dependency is exported to consumers, that is to say found on their compile classpath.
-    api 'org.apache.commons:commons-math3:3.6.1'
-
-    // This dependency is used internally, and not exposed to consumers on their own compile classpath.
-    implementation 'com.google.guava:guava:31.1-jre'
 }
 
 def MAVEN_PASSWORD_PROPERTY = "AriasCreationsMavenPassword"
@@ -63,6 +58,19 @@ publishing {
         mavenJava(MavenPublication) {
             artifact sourcesJar
             artifact jar
+
+
+            pom.withXml {
+                def dependenciesNode = asNode().appendNode('dependencies')
+
+                //Iterate over the compile dependencies (we don't want the test ones), adding a <dependency> node for each
+                configurations.compile.allDependencies.each {
+                    def dependencyNode = dependenciesNode.appendNode('dependency')
+                    dependencyNode.appendNode('groupId', it.group)
+                    dependencyNode.appendNode('artifactId', it.name)
+                    dependencyNode.appendNode('version', it.version)
+                }
+            }
         }
     }
     repositories {
