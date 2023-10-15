@@ -57,6 +57,10 @@ task sourcesJar (type: Jar) {
     from sourceSets.main.allJava
 }
 
+jar {
+    archiveClassifier = "final"
+}
+
 publishing {
     publications {
         mavenJava(MavenPublication) {
@@ -65,7 +69,7 @@ publishing {
                 classifier = "sources"
             }
             artifact (jar) {
-                classifier = ""
+                classifier = "final"
             }
         }
     }
