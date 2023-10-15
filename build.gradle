@@ -19,7 +19,6 @@ archivesBaseName = "EventsBus"
 
 java {
     toolchain.languageVersion = JavaLanguageVersion.of(17)
-    withSourcesJar()
 }
 
 def determinePatchVersion = {
@@ -53,12 +52,21 @@ dependencies {
 
 def MAVEN_PASSWORD_PROPERTY = "AriasCreationsMavenPassword"
 
+task sourcesJar (type: Jar) {
+    archiveClassifier = "sources"
+    from sourceSets.main.allJava
+}
+
 publishing {
     publications {
         mavenJava(MavenPublication) {
             from components.java
-            artifact sourcesJar
-            artifact jar
+            artifact (sourcesJar) {
+                classifier = "sources"
+            }
+            artifact (jar) {
+                classifier = ""
+            }
         }
     }
     repositories {
