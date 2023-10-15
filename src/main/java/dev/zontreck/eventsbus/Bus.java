@@ -2,7 +2,6 @@ package dev.zontreck.eventsbus;
 
 import dev.zontreck.eventsbus.events.EventBusReadyEvent;
 import dev.zontreck.eventsbus.events.ResetEventBusEvent;
-import org.checkerframework.common.reflection.qual.GetClass;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
