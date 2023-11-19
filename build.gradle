@@ -62,7 +62,6 @@ publishing {
     publications {
         mavenJava(MavenPublication) {
             from components.java
-            artifactId = 'EventsBus' // Replace 'your-artifact-id' with your actual artifact ID
             artifact jar {
                 archiveClassifier = 'release'
             }
