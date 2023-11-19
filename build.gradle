@@ -58,13 +58,17 @@ dependencies {
 
 def MAVEN_PASSWORD_PROPERTY = "AriasCreationsMavenPassword"
 
+tasks.named('jar', Jar).configure {
+    archiveClassifier = "RELEASE"
+}
+
 publishing {
     publications {
         mavenJava(MavenPublication) {
             from components.java
             artifact jar
-            //artifact sourcesJar
-            //artifact javadocJar
+            artifact sourcesJar
+            artifact javadocJar
         }
     }
     repositories {
