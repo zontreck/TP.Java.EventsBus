@@ -85,11 +85,3 @@ publishing {
         }
     }
 }
-
-compileJava.finalizedBy("sourcesJar")
-compileJava.finalizedBy("javadocJar")
-artifacts {
-    archives jar
-    archives sourcesJar
-    archives javadocJar
-}
