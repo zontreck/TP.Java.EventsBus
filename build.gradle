@@ -23,6 +23,7 @@ java {
     withJavadocJar()
 }
 
+
 def determinePatchVersion = {
     // get the name of the last tag
     def tagInfo = new ByteArrayOutputStream()
@@ -39,6 +40,9 @@ def determinePatchVersion = {
 }
 version = determinePatchVersion()
 version = "${apiVer}.${version}"
+
+println("Compile for version : ${version}")
+
 repositories {
     // Use Maven Central for resolving dependencies.
     // mavenCentral()
