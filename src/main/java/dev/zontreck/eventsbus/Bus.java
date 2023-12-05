@@ -41,12 +41,12 @@ public class Bus {
         List<Method> nonStaticMethods = Arrays.stream(clazz.getMethods())
                 .filter(x -> x.isAnnotationPresent(Subscribe.class))
                 .filter(x -> (x.getModifiers() & Modifier.STATIC) != Modifier.STATIC)
-                .toList();
+                .collect(Collectors.toList());
 
         List<Method> staticMethods = Arrays.stream(clazz.getMethods())
                 .filter(x -> x.isAnnotationPresent(Subscribe.class))
                 .filter(x -> (x.getModifiers() & Modifier.STATIC) == Modifier.STATIC)
-                .toList();
+                .collect(Collectors.toList());
 
         // Register the non-static methods if applicable
         if (instance != null) {
