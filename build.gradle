@@ -47,7 +47,7 @@ repositories {
     // Use Maven Central for resolving dependencies.
     // mavenCentral()
     maven {
-        url = "https://maven.zontreck.dev/repository/internal"
+        url = "https://maven.zontreck.com/repository/internal"
         name = "Aria's Creations"
     }
 }
@@ -70,7 +70,7 @@ publishing {
 
     repositories {
         maven {
-            url = "https://maven.zontreck.dev/repository/zontreck"
+            url = "https://maven.zontreck.com/repository/zontreck"
             name = "ariascreations"
             group = "dev.zontreck"
             if (project.findProperty(MAVEN_PASSWORD_PROPERTY) != null) {
