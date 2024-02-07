@@ -17,8 +17,8 @@ plugins {
 group = "dev.zontreck"
 archivesBaseName = "EventsBus"
 
+java.toolchain.languageVersion = JavaLanguageVersion.of(8)
 java {
-    toolchain.languageVersion = JavaLanguageVersion.of(8)
     withSourcesJar()
     withJavadocJar()
 }
@@ -56,23 +56,20 @@ dependencies {
 
 }
 
-def MAVEN_PASSWORD_PROPERTY = "AriasCreationsMavenPassword"
 
+def MAVEN_PASSWORD_PROPERTY = "AriasCreationsMavenPassword"
 publishing {
     publications {
         mavenJava(MavenPublication) {
-            //from components.java
             artifact jar
             artifact sourcesJar
             artifact javadocJar
         }
     }
-
     repositories {
         maven {
             url = "https://maven.zontreck.com/repository/zontreck"
             name = "ariascreations"
-            group = "dev.zontreck"
             if (project.findProperty(MAVEN_PASSWORD_PROPERTY) != null) {
                 credentials {
                     username = "admin"
@@ -82,3 +79,4 @@ publishing {
         }
     }
 }
+
