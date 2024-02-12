@@ -60,13 +60,15 @@ public class Bus {
                     container.Level = m.getAnnotation(Priority.class).Level();
                 else container.Level = PriorityLevel.LOWEST;
 
+                Class<?> clz = m.getParameters()[0].getType();
+
                 container.IsSingleshot = m.isAnnotationPresent(SingleshotEvent.class);
 
-                if (Main.instanced_events.containsKey(clazz))
-                    Main.instanced_events.get(clazz).add(container);
+                if (Main.instanced_events.containsKey(clz))
+                    Main.instanced_events.get(clz).add(container);
                 else {
-                    Main.instanced_events.put(clazz, new ArrayList<>());
-                    Main.instanced_events.get(clazz).add(container);
+                    Main.instanced_events.put(clz, new ArrayList<>());
+                    Main.instanced_events.get(clz).add(container);
                 }
             }
         }
@@ -74,18 +76,20 @@ public class Bus {
         for (Method m : staticMethods) {
             EventContainer container = new EventContainer();
             container.instance = null;
+            container.method = m;
             container.clazz = clazz;
             if (m.isAnnotationPresent((Priority.class)))
                 container.Level = m.getAnnotation(Priority.class).Level();
             else container.Level = PriorityLevel.LOWEST;
 
+            Class<?> clz = m.getParameters()[0].getType();
             container.IsSingleshot = m.isAnnotationPresent(SingleshotEvent.class);
 
-            if (Main.static_events.containsKey(clazz))
-                Main.static_events.get(clazz).add(container);
+            if (Main.static_events.containsKey(clz))
+                Main.static_events.get(clz).add(container);
             else {
-                Main.static_events.put(clazz, new ArrayList<>());
-                Main.static_events.get(clazz).add(container);
+                Main.static_events.put(clz, new ArrayList<>());
+                Main.static_events.get(clz).add(container);
             }
         }
     }
