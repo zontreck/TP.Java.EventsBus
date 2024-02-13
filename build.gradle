@@ -23,6 +23,13 @@ java {
     withJavadocJar()
 }
 
+configurations {
+    provided
+    implementation.extendsFrom(provided)
+    runtime.extendsFrom(provided)
+    compile.extendsFrom(provided)
+}
+
 
 def determinePatchVersion = {
     // get the name of the last tag
@@ -53,9 +60,38 @@ repositories {
 }
 
 dependencies {
+    provided "org.reflections:reflections:0.10.2"
+}
+
+
+
+jar {
+    manifest {
+        attributes (
+                'Multi-Release': 'true'
+        )
+    }
 
 }
 
+task jarjar(type: Jar) {
+    manifest {
+        attributes (
+                'Multi-Release': 'true'
+        )
+    }
+    archiveClassifier = "AIO"
+    duplicatesStrategy = "exclude"
+    from { configurations.provided.collect { it.isDirectory() ? it : zipTree(it) } }
+
+    exclude 'META-INF/*'
+    exclude 'META-INF/*'
+    exclude 'META-INF/*'
+
+    with jar
+}
+
+jarjar.dependsOn(jar, sourcesJar, javadocJar)
 
 def MAVEN_PASSWORD_PROPERTY = "AriasCreationsMavenPassword"
 publishing {

@@ -6,6 +6,7 @@ import dev.zontreck.eventsbus.annotations.SingleshotEvent;
 import dev.zontreck.eventsbus.annotations.Subscribe;
 import dev.zontreck.eventsbus.events.EventBusReadyEvent;
 import dev.zontreck.eventsbus.events.ResetEventBusEvent;
+import org.reflections.Reflections;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
@@ -13,6 +14,7 @@ import java.lang.reflect.Method;
 import java.lang.reflect.Parameter;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 public class EventDispatcher
 {
@@ -93,35 +95,26 @@ public class EventDispatcher
      */
     private static void Scan()
     {
-        ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
         Package[] packages = Package.getPackages();
 
         List<Class<?>> loaded = new ArrayList<>();
 
         for(Package pkg : packages)
         {
-            try{
-                String packageName = pkg.getName();
 
-                var clField = classLoader.getClass().getDeclaredField("classes");
-                clField.setAccessible(true);
+            String packageName = pkg.getName();
 
-                List<Class<?>> classes = (List<Class<?>>) clField.get(classLoader);
+            Reflections reflections = new Reflections(packageName);
+            var classes = reflections.getSubTypesOf(Object.class).stream().collect(Collectors.toList());
 
-                for(Class<?> clazz : classes)
+            for(Class<?> clazz : classes)
+            {
+                if(clazz.getPackage().getName().equalsIgnoreCase(packageName))
                 {
-                    if(clazz.getPackage().getName().equalsIgnoreCase(packageName))
-                    {
 
-                        if(clazz.isAnnotationPresent(EventSubscriber.class))
-                            loaded.add(clazz);
-                    }
+                    if(clazz.isAnnotationPresent(EventSubscriber.class))
+                        loaded.add(clazz);
                 }
-
-            } catch (NoSuchFieldException e) {
-                throw new RuntimeException(e);
-            } catch (IllegalAccessException e) {
-                throw new RuntimeException(e);
             }
         }
 
