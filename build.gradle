@@ -71,27 +71,15 @@ jar {
                 'Multi-Release': 'true'
         )
     }
-
-}
-
-task jarjar(type: Jar) {
-    manifest {
-        attributes (
-                'Multi-Release': 'true'
-        )
-    }
-    archiveClassifier = "AIO"
     duplicatesStrategy = "exclude"
     from { configurations.provided.collect { it.isDirectory() ? it : zipTree(it) } }
 
     exclude 'META-INF/*'
     exclude 'META-INF/*'
     exclude 'META-INF/*'
-
-    with jar
 }
 
-jarjar.dependsOn(jar, sourcesJar, javadocJar)
+jar.dependsOn(sourcesJar, javadocJar)
 
 def MAVEN_PASSWORD_PROPERTY = "AriasCreationsMavenPassword"
 publishing {
