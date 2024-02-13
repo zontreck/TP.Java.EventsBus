@@ -102,10 +102,11 @@ public class EventDispatcher
         {
             try{
                 String packageName = pkg.getName();
-                Field classesField = classLoader.getClass().getDeclaredField("classes");
-                classesField.setAccessible(true);
 
-                List<Class<?>> classes = (List<Class<?>>) classesField.get(classLoader);
+                var clField = classLoader.getClass().getDeclaredField("classes");
+                clField.setAccessible(true);
+
+                List<Class<?>> classes = (List<Class<?>>) clField.get(classLoader);
 
                 for(Class<?> clazz : classes)
                 {
