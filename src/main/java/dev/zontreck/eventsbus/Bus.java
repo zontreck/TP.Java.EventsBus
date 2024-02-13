@@ -1,14 +1,22 @@
 package dev.zontreck.eventsbus;
 
+import dev.zontreck.eventsbus.annotations.Priority;
+import dev.zontreck.eventsbus.annotations.SingleshotEvent;
+import dev.zontreck.eventsbus.annotations.Subscribe;
 import dev.zontreck.eventsbus.events.EventBusReadyEvent;
 import dev.zontreck.eventsbus.events.ResetEventBusEvent;
 
-import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.util.*;
 import java.util.stream.Collectors;
 
+/**
+ * To be removed
+ * <br/>
+ * Use {} instead
+ */
+@Deprecated()
 public class Bus {
     /**
      * The main event bus!

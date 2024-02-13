@@ -1,6 +1,9 @@
 package dev.zontreck.eventsbus;
 
 
+import dev.zontreck.eventsbus.annotations.Cancellable;
+import dev.zontreck.eventsbus.annotations.Priority;
+
 public class Event {
     private boolean cancelled = false;
 

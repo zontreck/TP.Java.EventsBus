@@ -1,6 +1,6 @@
 package dev.zontreck.eventsbus.events;
 
-import dev.zontreck.eventsbus.Cancellable;
+import dev.zontreck.eventsbus.annotations.Cancellable;
 import dev.zontreck.eventsbus.Event;
 
 /**

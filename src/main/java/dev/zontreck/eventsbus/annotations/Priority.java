@@ -1,4 +1,6 @@
-package dev.zontreck.eventsbus;
+package dev.zontreck.eventsbus.annotations;
+
+import dev.zontreck.eventsbus.PriorityLevel;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
