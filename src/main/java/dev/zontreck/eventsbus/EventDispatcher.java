@@ -10,52 +10,67 @@ import dev.zontreck.eventsbus.events.ResetEventBusEvent;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.lang.reflect.Parameter;
 import java.util.ArrayList;
 import java.util.List;
 
-public class EventDispatcher {
+public class EventDispatcher
+{
     private static List<Method> singleshot = new ArrayList<>();
     private static List<Class<?>> subscribers = new ArrayList<>();
 
     /**
      * Scans every Java class that is currently loaded. It then checks for Subscribe, and a proper parameter before posting the Event.
      * The Event will only be posted if not cancelled using {@link Event#setCancelled(boolean)} and that {@link Subscribe#allowCancelled()} allows.
-     *
      * @param event The event to post
      * @return True if cancelled.
      */
-    public static boolean Post(Event event) {
-        for (PriorityLevel level : PriorityLevel.values()) {
-            for (Class<?> clazz : subscribers) {
-                for (Method M : clazz.getMethods()) {
-                    if (!M.isAnnotationPresent(Subscribe.class)) continue;
+
+    public static boolean Post(Event event)
+    {
+        for(PriorityLevel level : PriorityLevel.values())
+        {
+
+            for(Class<?> clazz : subscribers)
+            {
+                for(Method M :clazz.getMethods())
+                {
+                    if(!M.isAnnotationPresent(Subscribe.class)) continue;
 
                     Subscribe subscriber = M.getAnnotation(Subscribe.class);
 
-                    boolean canPost = true;
+
+                    boolean canPost=true;
                     Class<?> param = M.getParameterTypes()[0];
-                    if (param == event.getClass()) {
-                        if (M.isAnnotationPresent(SingleshotEvent.class)) {
-                            if (singleshot.contains(M)) {
-                                canPost = false;
+                    if(param == event.getClass())
+                    {
+                        if(M.isAnnotationPresent(SingleshotEvent.class))
+                        {
+                            if(singleshot.contains(M))
+                            {
+                                canPost=false;
                             }
                         }
-                    } else canPost = false;
+                    } else canPost=false;
 
-                    PriorityLevel eventPriorityLevel = PriorityLevel.HIGH; // Default
+                    PriorityLevel eventPriotityLevel= PriorityLevel.HIGH; // Default
 
-                    if (M.isAnnotationPresent(Priority.class)) {
+                    if(M.isAnnotationPresent(Priority.class))
+                    {
                         Priority prio = M.getAnnotation(Priority.class);
-                        eventPriorityLevel = prio.Level();
+                        eventPriotityLevel=prio.Level();
                     }
 
-                    if (level != eventPriorityLevel) {
-                        canPost = false;
+                    if(level != eventPriotityLevel)
+                    {
+                        canPost=false;
                     }
+
 
                     // Dispatch the event now
+
                     try {
-                        if (event.isCancelled() && !subscriber.allowCancelled())
+                        if(event.isCancelled() && !subscriber.allowCancelled())
                             continue;
                         else
                             M.invoke(null, event);
@@ -64,23 +79,49 @@ public class EventDispatcher {
                     } catch (InvocationTargetException e) {
                         throw new RuntimeException(e);
                     }
+
                 }
             }
         }
+
         return event.isCancelled();
     }
+
 
     /**
      * Scan all event subscribers
      */
-    public static void Scan() {
+    private static void Scan()
+    {
         ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
+        Package[] packages = Package.getPackages();
+
         List<Class<?>> loaded = new ArrayList<>();
 
-        CustomClassLoader customClassLoader = new CustomClassLoader(classLoader);
+        for(Package pkg : packages)
+        {
+            try{
+                String packageName = pkg.getName();
+                Field classesField = classLoader.getClass().getDeclaredField("classes");
+                classesField.setAccessible(true);
 
-        for (Package pkg : Package.getPackages()) {
-            customClassLoader.loadClasses(pkg.getName(), loaded);
+                List<Class<?>> classes = (List<Class<?>>) classesField.get(classLoader);
+
+                for(Class<?> clazz : classes)
+                {
+                    if(clazz.getPackage().getName().equalsIgnoreCase(packageName))
+                    {
+
+                        if(clazz.isAnnotationPresent(EventSubscriber.class))
+                            loaded.add(clazz);
+                    }
+                }
+
+            } catch (NoSuchFieldException e) {
+                throw new RuntimeException(e);
+            } catch (IllegalAccessException e) {
+                throw new RuntimeException(e);
+            }
         }
 
         subscribers = loaded;
@@ -89,9 +130,10 @@ public class EventDispatcher {
     /**
      * Resets the events system.
      * <br/>
-     * This action clears the Singleshot list for the events that should only be invoked once. And rescans all classes in case new classes were dynamically loaded.
+     * This action clears the Singleshot list for the events that should only be invoked once. And rescans all classes incase new classes were dynamically loaded.
      */
-    public static void Reset() {
+    public static void Reset()
+    {
         Post(new ResetEventBusEvent());
 
         singleshot.clear();
@@ -99,46 +141,5 @@ public class EventDispatcher {
         ClassScanner.DoScan();
 
         Post(new EventBusReadyEvent());
-    }
-
-    static class CustomClassLoader extends ClassLoader {
-        private final ClassLoader parent;
-
-        public CustomClassLoader(ClassLoader parent) {
-            super(parent);
-            this.parent = parent;
-        }
-
-        public void loadClasses(String packageName, List<Class<?>> loaded) {
-
-            Field classesField = EventDispatcher.findField(ClassLoader.class, "classes");
-            classesField.setAccessible(true);
-            List<Class<?>> classes = null;
-            try {
-                classes = (List<Class<?>>) classesField.get(parent);
-            } catch (IllegalAccessException e) {
-                throw new RuntimeException(e);
-            }
-
-            for (Class<?> clazz : classes) {
-                if (clazz.getPackage().getName().equals(packageName) &&
-                        clazz.isAnnotationPresent(EventSubscriber.class)) {
-                    loaded.add(clazz);
-                }
-            }
-        }
-    }
-
-    private static Field findField(Class<?> clazz, String name)
-    {
-        for(Field f : clazz.getFields())
-        {
-            if(f.getName().equalsIgnoreCase(name))
-            {
-                return f;
-            }
-        }
-
-        return null;
     }
 }
