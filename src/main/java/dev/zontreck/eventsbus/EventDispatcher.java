@@ -1,13 +1,14 @@
 package dev.zontreck.eventsbus;
 
+import com.google.common.reflect.ClassPath;
 import dev.zontreck.eventsbus.annotations.EventSubscriber;
 import dev.zontreck.eventsbus.annotations.Priority;
 import dev.zontreck.eventsbus.annotations.SingleshotEvent;
 import dev.zontreck.eventsbus.annotations.Subscribe;
 import dev.zontreck.eventsbus.events.EventBusReadyEvent;
 import dev.zontreck.eventsbus.events.ResetEventBusEvent;
-import org.reflections.Reflections;
 
+import java.io.IOException;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -102,19 +103,28 @@ public class EventDispatcher
         for(Package pkg : packages)
         {
 
-            String packageName = pkg.getName();
+            try {
 
-            Reflections reflections = new Reflections(packageName);
-            var classes = reflections.getSubTypesOf(Object.class).stream().collect(Collectors.toList());
+                String packageName = pkg.getName();
 
-            for(Class<?> clazz : classes)
-            {
-                if(clazz.getPackage().getName().equalsIgnoreCase(packageName))
+                var classes = ClassPath.from(ClassLoader.getSystemClassLoader())
+                        .getAllClasses()
+                        .stream()
+                        .filter(clz->clz.getPackageName().equals(packageName))
+                        .map(c->c.load())
+                        .collect(Collectors.toList());
+
+                for(Class<?> clazz : classes)
                 {
+                    if(clazz.getPackage().getName().equalsIgnoreCase(packageName))
+                    {
 
-                    if(clazz.isAnnotationPresent(EventSubscriber.class))
-                        loaded.add(clazz);
+                        if(clazz.isAnnotationPresent(EventSubscriber.class))
+                            loaded.add(clazz);
+                    }
                 }
+            } catch (IOException e) {
+                throw new RuntimeException(e);
             }
         }
 

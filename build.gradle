@@ -60,7 +60,7 @@ repositories {
 }
 
 dependencies {
-    provided "org.reflections:reflections:0.10.2"
+    provided "com.google.guava:guava:31.1-jre"
 }
 
 
