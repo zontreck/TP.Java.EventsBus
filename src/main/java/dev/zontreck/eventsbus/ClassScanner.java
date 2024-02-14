@@ -9,6 +9,8 @@ import java.util.Set;
 import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
 
+
+@Deprecated
 /**
  * Used internally. Do not directly invoke
  * <br/>

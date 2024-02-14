@@ -111,7 +111,6 @@ public class EventDispatcher
 
         subscribers.clear();
         singleshot.clear();
-        ClassScanner.DoScan();
 
         Post(new EventBusReadyEvent());
     }
