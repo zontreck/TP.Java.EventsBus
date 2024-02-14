@@ -73,6 +73,13 @@ public class EventDispatcher
                     // Dispatch the event now
 
                     if(!canPost) continue;
+
+                    if(!M.canAccess(null))
+                    {
+                        canPost=false;
+                        System.out.println("ERROR: Even subscriber methods must be static and public");
+                    }
+
                     try {
                         if(event.isCancelled() && !subscriber.allowCancelled())
                             continue;
