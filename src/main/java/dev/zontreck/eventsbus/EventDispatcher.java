@@ -92,43 +92,12 @@ public class EventDispatcher
 
 
     /**
-     * Scan all event subscribers
+     * Register a class
      */
-    private static void Scan()
+    public static void Register(Class<?> clazz)
     {
-        Package[] packages = Package.getPackages();
-
-        List<Class<?>> loaded = new ArrayList<>();
-
-        for(Package pkg : packages)
-        {
-
-            try {
-
-                String packageName = pkg.getName();
-
-                var classes = ClassPath.from(ClassLoader.getSystemClassLoader())
-                        .getAllClasses()
-                        .stream()
-                        .filter(clz->clz.getPackageName().equals(packageName))
-                        .map(c->c.load())
-                        .collect(Collectors.toList());
-
-                for(Class<?> clazz : classes)
-                {
-                    if(clazz.getPackage().getName().equalsIgnoreCase(packageName))
-                    {
-
-                        if(clazz.isAnnotationPresent(EventSubscriber.class))
-                            loaded.add(clazz);
-                    }
-                }
-            } catch (IOException e) {
-                throw new RuntimeException(e);
-            }
-        }
-
-        subscribers = loaded;
+        if(clazz.isAnnotationPresent(EventSubscriber.class))
+            subscribers.add(clazz);
     }
 
     /**
@@ -140,8 +109,8 @@ public class EventDispatcher
     {
         Post(new ResetEventBusEvent());
 
+        subscribers.clear();
         singleshot.clear();
-        Scan();
         ClassScanner.DoScan();
 
         Post(new EventBusReadyEvent());
