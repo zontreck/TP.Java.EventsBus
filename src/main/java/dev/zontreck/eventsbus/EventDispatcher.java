@@ -72,6 +72,7 @@ public class EventDispatcher
 
                     // Dispatch the event now
 
+                    if(!canPost) continue;
                     try {
                         if(event.isCancelled() && !subscriber.allowCancelled())
                             continue;
