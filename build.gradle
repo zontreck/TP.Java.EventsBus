@@ -52,11 +52,7 @@ println("Compile for version : ${version}")
 
 repositories {
     // Use Maven Central for resolving dependencies.
-    // mavenCentral()
-    maven {
-        url = "https://maven.zontreck.com/repository/internal"
-        name = "Aria's Creations"
-    }
+    mavenCentral()
 }
 
 dependencies {
@@ -81,7 +77,9 @@ jar {
 
 jar.dependsOn(sourcesJar, javadocJar)
 
-def MAVEN_PASSWORD_PROPERTY = "AriasCreationsMavenPassword"
+def MAVEN_PASSWORD = "AriasCreationsMavenPassword"
+def MAVEN_USER = "AriasCreationsMavenUser"
+
 publishing {
     publications {
         mavenJava(MavenPublication) {
@@ -90,15 +88,15 @@ publishing {
             artifact javadocJar
         }
     }
+
     repositories {
         maven {
-            url = "https://maven.zontreck.com/repository/zontreck"
+            url = "https://git.zontreck.com/api/packages/AriasCreations/maven"
             name = "ariascreations"
-            if (project.findProperty(MAVEN_PASSWORD_PROPERTY) != null) {
-                credentials {
-                    username = "admin"
-                    password = project.findProperty(MAVEN_PASSWORD_PROPERTY)
-                }
+
+            credentials {
+                username = project.findProperty(MAVEN_USER)
+                password = project.findProperty(MAVEN_PASSWORD)
             }
         }
     }
